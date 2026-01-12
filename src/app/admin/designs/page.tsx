@@ -2,6 +2,8 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { prisma, Category, Design } from '@/lib/prisma'
 
+export const dynamic = 'force-dynamic'
+
 type DesignWithCategory = NonNullable<Design> & { category: NonNullable<Category> }
 
 async function getDesigns(): Promise<DesignWithCategory[]> {

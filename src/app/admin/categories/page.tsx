@@ -2,6 +2,8 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { prisma, Category } from '@/lib/prisma'
 
+export const dynamic = 'force-dynamic'
+
 type CategoryWithCount = NonNullable<Category> & { _count: { designs: number } }
 
 async function getCategories(): Promise<CategoryWithCount[]> {

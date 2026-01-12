@@ -3,6 +3,8 @@ import Image from 'next/image'
 import { prisma, Category } from '@/lib/prisma'
 import { categoryIcons } from '@/lib/utils'
 
+export const dynamic = 'force-dynamic'
+
 type CategoryWithCount = NonNullable<Category> & { _count: { designs: number } }
 
 async function getCategories(): Promise<CategoryWithCount[]> {

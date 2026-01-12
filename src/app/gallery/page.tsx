@@ -3,6 +3,8 @@ import Image from 'next/image'
 import { prisma, Category, Design } from '@/lib/prisma'
 import GalleryGrid from '@/components/GalleryGrid'
 
+export const dynamic = 'force-dynamic'
+
 type DesignWithCategory = NonNullable<Design> & { category: NonNullable<Category> }
 
 async function getAllDesigns(): Promise<DesignWithCategory[]> {
