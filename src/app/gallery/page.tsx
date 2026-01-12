@@ -4,22 +4,33 @@ import { prisma, Category, Design } from '@/lib/prisma'
 import GalleryGrid from '@/components/GalleryGrid'
 
 export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
 
 type DesignWithCategory = NonNullable<Design> & { category: NonNullable<Category> }
 
 async function getAllDesigns(): Promise<DesignWithCategory[]> {
-  return await prisma.design.findMany({
-    where: { isActive: true },
-    include: { category: true },
-    orderBy: { createdAt: 'desc' }
-  }) as DesignWithCategory[]
+  try {
+    return await prisma.design.findMany({
+      where: { isActive: true },
+      include: { category: true },
+      orderBy: { createdAt: 'desc' }
+    }) as DesignWithCategory[]
+  } catch (error) {
+    console.error('Error fetching designs:', error)
+    return []
+  }
 }
 
 async function getCategories(): Promise<Category[]> {
-  return await prisma.category.findMany({
-    where: { isActive: true },
-    orderBy: { sortOrder: 'asc' }
-  })
+  try {
+    return await prisma.category.findMany({
+      where: { isActive: true },
+      orderBy: { sortOrder: 'asc' }
+    })
+  } catch (error) {
+    console.error('Error fetching categories:', error)
+    return []
+  }
 }
 
 export const metadata = {

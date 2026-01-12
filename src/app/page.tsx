@@ -4,19 +4,25 @@ import { prisma, Category } from '@/lib/prisma'
 import { categoryIcons } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
 
 type CategoryWithCount = NonNullable<Category> & { _count: { designs: number } }
 
 async function getCategories(): Promise<CategoryWithCount[]> {
-  return await prisma.category.findMany({
-    where: { isActive: true },
-    orderBy: { sortOrder: 'asc' },
-    include: {
-      _count: {
-        select: { designs: { where: { isActive: true } } }
+  try {
+    return await prisma.category.findMany({
+      where: { isActive: true },
+      orderBy: { sortOrder: 'asc' },
+      include: {
+        _count: {
+          select: { designs: { where: { isActive: true } } }
+        }
       }
-    }
-  }) as CategoryWithCount[]
+    }) as CategoryWithCount[]
+  } catch (error) {
+    console.error('Error fetching categories:', error)
+    return []
+  }
 }
 
 export default async function HomePage() {
