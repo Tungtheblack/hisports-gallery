@@ -61,7 +61,7 @@ export default async function GalleryPage() {
             >
               ທັງໝົດ ({designs.length})
             </Link>
-            {categories.map((category) => (
+            {categories.filter((c): c is NonNullable<typeof c> => c !== null).map((category) => (
               <Link
                 key={category.id}
                 href={`/gallery/${category.slug}`}

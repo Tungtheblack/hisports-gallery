@@ -84,7 +84,7 @@ export default async function CategoryGalleryPage({ params }: Props) {
             >
               ທັງໝົດ
             </Link>
-            {categories.map((cat) => (
+            {categories.filter((cat): cat is NonNullable<typeof cat> => cat !== null).map((cat) => (
               <Link
                 key={cat.id}
                 href={`/gallery/${cat.slug}`}
