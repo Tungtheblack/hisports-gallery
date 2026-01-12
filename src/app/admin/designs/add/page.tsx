@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { uploadToHostinger } from '@/lib/upload'
 
 interface Category {
   id: number
@@ -16,6 +17,8 @@ export default function AddDesignPage() {
   const [error, setError] = useState('')
   const [categories, setCategories] = useState<Category[]>([])
   const [generatedCode, setGeneratedCode] = useState('')
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [preview, setPreview] = useState<string | null>(null)
 
   useEffect(() => {
     fetch('/api/categories')
@@ -37,17 +40,44 @@ export default function AddDesignPage() {
     }
   }
 
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (file) {
+      setSelectedFile(file)
+      setPreview(URL.createObjectURL(file))
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setLoading(true)
     setError('')
 
-    const formData = new FormData(e.currentTarget)
-
     try {
+      // 1. Upload file to Hostinger
+      if (!selectedFile) {
+        throw new Error('ກະລຸນາເລືອກຮູບ')
+      }
+
+      const uploadResult = await uploadToHostinger(selectedFile, 'designs', generatedCode)
+      if (!uploadResult.success) {
+        throw new Error(uploadResult.error || 'Upload failed')
+      }
+
+      // 2. Save to database via API
+      const formData = new FormData(e.currentTarget)
+      const body = {
+        categoryId: parseInt(formData.get('categoryId') as string),
+        code: formData.get('code') as string,
+        year: parseInt(formData.get('year') as string),
+        note: formData.get('note') as string,
+        imageUrl: uploadResult.url
+      }
+
       const res = await fetch('/api/designs', {
         method: 'POST',
-        body: formData
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
       })
 
       if (!res.ok) {
@@ -57,8 +87,9 @@ export default function AddDesignPage() {
 
       router.push('/admin/designs')
       router.refresh()
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'ເກີດຂໍ້ຜິດພາດ'
+      setError(errorMessage)
     } finally {
       setLoading(false)
     }
@@ -155,10 +186,16 @@ export default function AddDesignPage() {
               name="image"
               accept="image/*"
               required
+              onChange={handleFileChange}
               className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white 
                         file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 
                         file:bg-pink-500 file:text-white file:cursor-pointer"
             />
+            {preview && (
+              <div className="mt-3">
+                <img src={preview} alt="Preview" className="max-h-48 rounded-lg" />
+              </div>
+            )}
           </div>
 
           <div className="flex gap-4">

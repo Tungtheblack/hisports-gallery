@@ -3,23 +3,56 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { uploadToHostinger } from '@/lib/upload'
 
 export default function AddCategoryPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [preview, setPreview] = useState<string | null>(null)
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (file) {
+      setSelectedFile(file)
+      setPreview(URL.createObjectURL(file))
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setLoading(true)
     setError('')
 
-    const formData = new FormData(e.currentTarget)
-
     try {
+      const formData = new FormData(e.currentTarget)
+      const name = formData.get('name') as string
+      const sortOrder = formData.get('sortOrder') as string
+
+      let imageUrl: string | null = null
+
+      // Upload file if selected
+      if (selectedFile) {
+        const slug = name.toLowerCase().replace(/\s+/g, '-')
+        const uploadResult = await uploadToHostinger(selectedFile, 'categories', slug)
+        if (!uploadResult.success) {
+          throw new Error(uploadResult.error || 'Upload failed')
+        }
+        imageUrl = uploadResult.url || null
+      }
+
+      // Save to database
+      const body = new FormData()
+      body.append('name', name)
+      body.append('sortOrder', sortOrder)
+      if (imageUrl) {
+        body.append('imageUrl', imageUrl)
+      }
+
       const res = await fetch('/api/categories', {
         method: 'POST',
-        body: formData
+        body: body
       })
 
       if (!res.ok) {
@@ -29,8 +62,9 @@ export default function AddCategoryPage() {
 
       router.push('/admin/categories')
       router.refresh()
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'ເກີດຂໍ້ຜິດພາດ'
+      setError(errorMessage)
     } finally {
       setLoading(false)
     }
@@ -98,10 +132,16 @@ export default function AddCategoryPage() {
               type="file"
               name="image"
               accept="image/*"
+              onChange={handleFileChange}
               className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white 
                         file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 
                         file:bg-pink-500 file:text-white file:cursor-pointer"
             />
+            {preview && (
+              <div className="mt-3">
+                <img src={preview} alt="Preview" className="max-h-48 rounded-lg" />
+              </div>
+            )}
           </div>
 
           <div className="flex gap-4">
