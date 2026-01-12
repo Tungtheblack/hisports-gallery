@@ -1,0 +1,29 @@
+@import "tailwindcss";
+
+:root {
+  --background: #1e3a8a;
+  --foreground: #ffffff;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-noto-sans-lao), Arial, sans-serif;
+}
+
+body {
+  background: linear-gradient(to bottom right, #1e3a8a, #581c87, #312e81);
+  color: var(--foreground);
+  font-family: var(--font-noto-sans-lao), Arial, sans-serif;
+  min-height: 100vh;
+}
+
+/* Lazy loading image animation */
+.lazy-image {
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.lazy-image.loaded {
+  opacity: 1;
+}
