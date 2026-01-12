@@ -1,6 +1,6 @@
 // Upload file to Hostinger
-const UPLOAD_API_URL = process.env.NEXT_PUBLIC_UPLOAD_API_URL || 'https://yourdomain.com/api/upload.php'
-const UPLOAD_SECRET_KEY = process.env.UPLOAD_SECRET_KEY || ''
+const UPLOAD_API_URL = process.env.NEXT_PUBLIC_UPLOAD_API_URL || 'https://gallery.hisports.art/api/upload.php'
+const UPLOAD_SECRET_KEY = process.env.NEXT_PUBLIC_UPLOAD_SECRET_KEY || 'hisports-upload-2026-secret'
 
 export async function uploadToHostinger(
   file: File,
