@@ -61,8 +61,3 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'ເກີດຂໍ້ຜິດພາດ' }, { status: 500 })
   }
 }
-  } catch (error) {
-    console.error(error)
-    return NextResponse.json({ error: 'ເກີດຂໍ້ຜິດພາດ' }, { status: 500 })
-  }
-}
